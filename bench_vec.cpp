@@ -1,6 +1,8 @@
 #include "functions.hpp"
 #include <cstring>
 
+constexpr float CPU_FREQUENCY = 4.0;
+
 /////////////////////////////////////////////////////////////////
 // Easy: Linear algebra
 /////////////////////////////////////////////////////////////////
@@ -30,7 +32,7 @@ BENCHMARK_F(MatrixFixture, mult_auto)(benchmark::State& state)
         benchmark::DoNotOptimize(mult_no_inline(lhs, rhs));
     }
     state.counters["Rate"] = benchmark::Counter(1, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(1 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(1 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 BENCHMARK_F(MatrixFixture, mult_static)(benchmark::State& state)
@@ -39,7 +41,7 @@ BENCHMARK_F(MatrixFixture, mult_static)(benchmark::State& state)
         benchmark::DoNotOptimize(mult(lhs, rhs));
     }
     state.counters["Rate"] = benchmark::Counter(1, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(1 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(1 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 BENCHMARK_F(MatrixFixture, mult_opt)(benchmark::State& state)
@@ -48,7 +50,7 @@ BENCHMARK_F(MatrixFixture, mult_opt)(benchmark::State& state)
         benchmark::DoNotOptimize(mult_vec(lhs, rhs));
     }
     state.counters["Rate"] = benchmark::Counter(1, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(1 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(1 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 
@@ -74,7 +76,7 @@ BENCHMARK_F(RgbFixture, rgb2gray_auto)(benchmark::State& state)
         benchmark::DoNotOptimize(gray);
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 16 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 16 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 BENCHMARK_F(RgbFixture, rgb2gray_opt)(benchmark::State& state)
@@ -84,7 +86,7 @@ BENCHMARK_F(RgbFixture, rgb2gray_opt)(benchmark::State& state)
         benchmark::DoNotOptimize(gray);
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 16 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 16 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -119,7 +121,7 @@ BENCHMARK_F(FindFixture, find_auto)(benchmark::State& state)
         benchmark::DoNotOptimize(findfirst(s, p));
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 64 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 64 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 BENCHMARK_F(FindFixture, find_inner)(benchmark::State& state)
@@ -128,7 +130,7 @@ BENCHMARK_F(FindFixture, find_inner)(benchmark::State& state)
         benchmark::DoNotOptimize(findfirst_inner(s, p));
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 64 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 64 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 BENCHMARK_F(FindFixture, find_opt)(benchmark::State& state)
@@ -137,7 +139,7 @@ BENCHMARK_F(FindFixture, find_opt)(benchmark::State& state)
         benchmark::DoNotOptimize(findfirst_vec(s, p));
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 64 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 64 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 BENCHMARK_F(FindFixture, find_auto_long)(benchmark::State& state)
@@ -146,7 +148,7 @@ BENCHMARK_F(FindFixture, find_auto_long)(benchmark::State& state)
         benchmark::DoNotOptimize(findfirst(s, p_long));
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 64 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 64 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 BENCHMARK_F(FindFixture, find_inner_long)(benchmark::State& state)
@@ -155,7 +157,7 @@ BENCHMARK_F(FindFixture, find_inner_long)(benchmark::State& state)
         benchmark::DoNotOptimize(findfirst_inner(s, p_long));
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 64 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 64 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 BENCHMARK_F(FindFixture, find_opt_long)(benchmark::State& state)
@@ -164,7 +166,7 @@ BENCHMARK_F(FindFixture, find_opt_long)(benchmark::State& state)
         benchmark::DoNotOptimize(findfirst_vec(s, p_long));
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 64 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 64 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 // Utility function returning the lowest iterator where
@@ -390,7 +392,7 @@ BENCHMARK_F(FindFixture, find_avx512)(benchmark::State& state)
         benchmark::DoNotOptimize(find_avx512(s, p));
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 64 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 64 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 BENCHMARK_F(FindFixture, find_avx512_long)(benchmark::State& state)
@@ -399,7 +401,7 @@ BENCHMARK_F(FindFixture, find_avx512_long)(benchmark::State& state)
         benchmark::DoNotOptimize(find_avx512(s, p_long));
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 64 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 64 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -423,7 +425,7 @@ BENCHMARK_F(CompressFixture, compress_auto)(benchmark::State& state)
         benchmark::DoNotOptimize(sanitize(out.data, in.data, count));
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 16 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 16 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 BENCHMARK_F(CompressFixture, compress_opt)(benchmark::State& state)
@@ -433,7 +435,7 @@ BENCHMARK_F(CompressFixture, compress_opt)(benchmark::State& state)
         benchmark::DoNotOptimize(sanitize_vec(out.data, in.data, count));
     }
     state.counters["Rate"] = benchmark::Counter(count, benchmark::Counter::kIsIterationInvariantRate);
-    state.counters["Cycl"] = benchmark::Counter(count / 16 / 5.2, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+    state.counters["Cycl"] = benchmark::Counter(count / 16 / CPU_FREQUENCY, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 
 /////////////////////////////////////////////////////////////////
