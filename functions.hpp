@@ -232,7 +232,7 @@ static inline auto __attribute__ ((noinline)) findfirst_inner(const std::string&
 }
 
 // hand-optimized version that vectorizes the outer loop
-static inline auto __attribute__ ((noinline)) findfirst_vec(const std::string& s, const std::string& p)
+static inline auto __attribute__ ((noinline)) findfirst_outer(const std::string& s, const std::string& p)
 {
     // Separate out the "full chunks" code path from the tail.
     // Short input strings can skip this with a single compare&jump instruction - minimal overhead.
@@ -273,6 +273,9 @@ static inline auto __attribute__ ((noinline)) findfirst_vec(const std::string& s
 
     return s.end();
 }
+
+// LibC-style version of findfirst (see findfirst_avx512 for implementation)
+auto findfirst_avx512(const std::string& s, const std::string& p) -> std::string::const_iterator;
 
 /////////////////////////////////////////////////////////////////
 // Hard: Compression
@@ -327,7 +330,7 @@ static inline float* __attribute__ ((noinline)) sanitize_vec(float* __restrict__
         auto to_copy3 = __builtin_popcountll(mask);
 
         // Store the compacted chunks, overlap with the tail of respective previous store.
-        // Note that we don't check for OUT overflow as assume it to have COUNT capacity.
+        // Note that we don't check for OUT overflow as we assume it to have COUNT capacity.
         // Without that, we would have to do masked stores (using mask0 .. mask3) to clip
         // the tails.
         _mm512_storeu_ps(&out[copied], chunk0);
