@@ -23,6 +23,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Prerequisites: Google Benchmark and dependencies
 find_package(benchmark REQUIRED)
+find_package(GTest REQUIRED)
 find_package(TBB REQUIRED COMPONENTS tbb)
 
 # Tweak these as needed
@@ -41,8 +42,19 @@ set_source_files_properties(bench_scalar.cpp PROPERTIES COMPILE_FLAGS -fno-tree-
 
 # Combine scalar and auto-vectorized code into single benchmark app
 add_executable(meeting
+  findfirst_avx512.cpp
   bench_scalar.cpp
   bench_vec.cpp)
 
 target_link_libraries(meeting PRIVATE benchmark::benchmark)
 target_link_libraries(meeting PRIVATE tbb)
+
+add_executable(unittest
+  findfirst_avx512.cpp
+  test/test_mult.cpp
+  test/test_rgb.cpp
+  test/test_find.cpp
+  test/test_compact.cpp)
+
+target_include_directories(unittest PRIVATE .)
+target_link_libraries(unittest PRIVATE GTest::gtest_main)
