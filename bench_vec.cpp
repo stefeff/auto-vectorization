@@ -1,4 +1,5 @@
-#include "functions.hpp"
+#include "bench_fixtures.hpp"
+
 #include <cstring>
 
 constexpr float CPU_FREQUENCY = 4.0;

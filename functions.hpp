@@ -1,10 +1,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-
-#include <benchmark/benchmark.h>
-
 #include <immintrin.h>
+#include <string>
 
 /////////////////////////////////////////////////////////////////
 // Easy: Linear algebra
@@ -79,13 +77,6 @@ static inline Matrix __attribute__ ((noinline)) mult_vec(const Matrix& lhs, cons
     return result;
 }
 
-class MatrixFixture : public benchmark::Fixture {
-public:
-
-    static Matrix lhs, rhs;
-    void SetUp(::benchmark::State& state);
-};
-
 /////////////////////////////////////////////////////////////////
 // Medium difficulty: RGB -> Gray conversion
 /////////////////////////////////////////////////////////////////
@@ -99,8 +90,14 @@ struct RGB
 
 // original "scalar" code
 // (decorators are used to separate this from the benchmarking code)
-static inline void __attribute__ ((noinline)) rgb2gray(uint8_t* gray, const RGB* rgb, size_t n)
+static inline void __attribute__ ((noinline)) rgb2gray(uint8_t* __restrict__ gray, const RGB* rgb, size_t n)
 {
+    // std::transform(rgb, rgb + n, gray, [](auto pixel) {
+    //     float gr = 0.299f * pixel.red
+    //              + 0.587f * pixel.green
+    //              + 0.114f * pixel.blue;
+    //     return static_cast<uint8_t>(gr + 0.5f);
+    // });
     for (size_t i = 0; i < n; ++i) {
         auto& pixel = rgb[i];
 
@@ -173,19 +170,6 @@ static inline void __attribute__ ((noinline)) rgb2gray_vec(uint8_t* gray, const 
         _mm_mask_storeu_epi8(&gray[i], store_mask, gray8);
     }
 }
-
-class RgbFixture : public benchmark::Fixture {
-public:
-
-    static constexpr size_t count = 0x2000;
-    struct alignas(64) AlignedRGB { RGB data[count]; };
-    struct alignas(64) AlignedGray { uint8_t data[count]; };
-
-    static AlignedRGB rgb;
-    static AlignedGray gray;
-
-    void SetUp(::benchmark::State& state);
-};
 
 /////////////////////////////////////////////////////////////////
 // Challenging: 2D operation
@@ -290,17 +274,6 @@ static inline auto __attribute__ ((noinline)) findfirst_vec(const std::string& s
     return s.end();
 }
 
-class FindFixture : public benchmark::Fixture {
-public:
-
-    static size_t count;
-    static std::string s;
-    static std::string p;
-    static std::string p_long;
-
-    void SetUp(::benchmark::State& state);
-};
-
 /////////////////////////////////////////////////////////////////
 // Hard: Compression
 /////////////////////////////////////////////////////////////////
@@ -388,15 +361,3 @@ static inline float* __attribute__ ((noinline)) sanitize_vec(float* __restrict__
 
     return out + copied;
 }
-
-class CompressFixture : public benchmark::Fixture {
-public:
-
-    static constexpr size_t count = 0x1000;
-    struct alignas(64) AlignedFloats { float data[count]; };
-
-    static AlignedFloats in;
-    static AlignedFloats out;
-
-    void SetUp(::benchmark::State& state);
-};
