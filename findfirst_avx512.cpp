@@ -201,11 +201,11 @@ auto findfirst_avx512(const std::string& s, const std::string& p) -> std::string
         // In that case, we could merge the upper 128 table entries into the lower 128.
         bool conflict = ((is_set0 & is_set2) | (is_set1 & is_set3)) != 0;
         if (conflict) {
-            // A 128-entry table is enough
+            // We need the full 256-entry table (2x the lookup cost)
             return find_avx512(s, table0, table1, table2, table3);
         }
         else {
-            // We need the full 256-entry table (2x the lookup cost)
+            // A 128-entry table is enough
             return find_avx512(s, table0 | table2, table1 | table3);
         }
     }
