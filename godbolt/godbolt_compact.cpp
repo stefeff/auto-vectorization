@@ -1,50 +1,68 @@
-#include <string>
+#include <algorithm>
 #include <immintrin.h>
 
-auto findfirst(const std::string& s, const std::string& p)
+float* sanitize(float* __restrict__ out, const float* __restrict__ in, size_t count)
 {
-    auto first1 = s.begin();
-    auto last1 = s.end();
-    auto first2 = p.begin();
-    auto last2 = p.end();
-
-    // logic from std_algo.h's implementation of find_first_of
-    for (; first1 != last1; ++first1)
-    	for (auto iter = first2; iter != last2; ++iter)
-	        if (*first1 == *iter)
-	            return first1;
-
-    return last1;
+    return std::remove_copy_if(
+        in, in + count, out,
+        [](auto v) {
+            return v <= 0.f;
+        });
 }
 
-auto findfirst_vec(const std::string& s, const std::string& p)
+float* sanitize_vec(float* __restrict__ out, const float* __restrict__ in, size_t count)
 {
     size_t i = 0;
-    for (; i + 64 <= s.size(); i += 64) {
-        auto chunk = _mm512_loadu_epi8(s.data() + i);
-        __mmask64 match = 0;
-        for (auto c : p) {
-            match = _kor_mask64(match, _mm512_cmpeq_epi8_mask(_mm512_set1_epi8(c), chunk));
-        }
+    size_t copied = 0;
+    for (; i + 64 < count; i += 64) {
+        auto chunk0 = _mm512_load_ps(&in[i +  0]);
+        auto chunk1 = _mm512_load_ps(&in[i + 16]);
+        auto chunk2 = _mm512_load_ps(&in[i + 32]);
+        auto chunk3 = _mm512_load_ps(&in[i + 48]);
 
-        if (match) [[unlikely]] {
-            return s.begin() + i + _tzcnt_u64(match);
-        }
+        auto mask0 = _mm512_cmplt_ps_mask(_mm512_set1_ps(0.f), chunk0);
+        auto mask1 = _mm512_cmplt_ps_mask(_mm512_set1_ps(0.f), chunk1);
+        auto mask2 = _mm512_cmplt_ps_mask(_mm512_set1_ps(0.f), chunk2);
+        auto mask3 = _mm512_cmplt_ps_mask(_mm512_set1_ps(0.f), chunk3);
+
+        chunk0 = _mm512_maskz_compress_ps(mask0, chunk0);
+        chunk1 = _mm512_maskz_compress_ps(mask1, chunk1);
+        chunk2 = _mm512_maskz_compress_ps(mask2, chunk2);
+        chunk3 = _mm512_maskz_compress_ps(mask3, chunk3);
+
+        __mmask64 mask = mask0;
+        auto to_copy0 = __builtin_popcountll(mask);
+        mask = _mm512_kunpackw(mask0, mask1);
+        auto to_copy1 = __builtin_popcountll(mask);
+        mask = _mm512_kunpackd(mask2, mask);
+        auto to_copy2 = __builtin_popcountll(mask);
+        mask = mask | (__mmask64(mask3) << 48);
+        auto to_copy3 = __builtin_popcountll(mask);
+
+        _mm512_storeu_ps(&out[copied], chunk0);
+        _mm512_storeu_ps(&out[copied + to_copy0], chunk1);
+        _mm512_storeu_ps(&out[copied + to_copy1], chunk2);
+        _mm512_storeu_ps(&out[copied + to_copy2], chunk3);
+        copied += to_copy3;
     }
 
-    auto remaining = s.size() - i;
-    if (remaining) {
-        auto load_mask = _cvtu64_mask64((1ull << remaining) - 1);
-        auto chunk = _mm512_maskz_loadu_epi8(load_mask, s.data() + i);
-        __mmask64 match = 0;
-        for (auto c : p) {
-            match = _kor_mask64(match, _mm512_cmpeq_epi8_mask(_mm512_set1_epi8(c), chunk));
+    auto load_mask = _cvtu32_mask16(0xffff);
+    auto to_process_last = count % 16;
+    auto last_load_mask = _cvtu32_mask16((1ull << to_process_last) - 1);
+
+    for (; i < count; i += 16) {
+        if (i + 16 > count) {
+            load_mask = last_load_mask;
         }
 
-        if (match) [[unlikely]] {
-            return s.begin() + i + _tzcnt_u64(match);
-        }
+        auto chunk = _mm512_maskz_loadu_ps(load_mask, &in[i]);
+        auto mask = _mm512_cmplt_ps_mask(_mm512_set1_ps(0.f), chunk);
+
+        auto to_copy = __builtin_popcount(mask);
+        chunk = _mm512_maskz_compress_ps(mask, chunk);
+        _mm512_mask_storeu_ps(&out[copied], (1u << to_copy) - 1, chunk);
+        copied += to_copy;
     }
 
-    return s.end();
+    return out + copied;
 }
